@@ -1,0 +1,62 @@
+{
+  "actions": [],
+  "creation": "2026-05-12 10:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "enabled",
+    "company",
+    "account",
+    "account_role",
+    "notes"
+  ],
+  "fields": [
+    {
+      "default": "1",
+      "fieldname": "enabled",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Enabled"
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Company",
+      "options": "Company"
+    },
+    {
+      "fieldname": "account",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Account",
+      "options": "Account",
+      "reqd": 1
+    },
+    {
+      "fieldname": "account_role",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Account Role",
+      "options": "Bank\nCash\nWallet\nOther",
+      "reqd": 1
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes"
+    }
+  ],
+  "istable": 1,
+  "links": [],
+  "modified": "2026-05-12 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Cash Budget",
+  "name": "Cash Budget Cash Account",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}

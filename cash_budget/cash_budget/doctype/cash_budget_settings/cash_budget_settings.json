@@ -1,0 +1,188 @@
+{
+  "actions": [],
+  "autoname": "format:CBS-{company}",
+  "creation": "2026-05-12 10:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "company",
+    "is_group_settings",
+    "column_break_general",
+    "use_cost_center_as_fallback",
+    "require_mapping",
+    "section_break_defaults",
+    "default_receipt_item",
+    "default_payment_item",
+    "section_break_sources",
+    "include_journal_entry",
+    "include_payment_entry",
+    "column_break_sources",
+    "show_internal_transfers",
+    "detect_intercompany",
+    "ignore_cancelled_gl_entries",
+    "section_break_mapping",
+    "mapping_rules",
+    "section_break_cash_accounts",
+    "cash_accounts",
+    "section_break_intercompany",
+    "intercompany_parties"
+  ],
+  "fields": [
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
+      "default": "0",
+      "fieldname": "is_group_settings",
+      "fieldtype": "Check",
+      "label": "Is Group Settings"
+    },
+    {
+      "fieldname": "column_break_general",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "1",
+      "fieldname": "use_cost_center_as_fallback",
+      "fieldtype": "Check",
+      "label": "Use Cost Center As Fallback"
+    },
+    {
+      "default": "0",
+      "fieldname": "require_mapping",
+      "fieldtype": "Check",
+      "label": "Require Mapping"
+    },
+    {
+      "fieldname": "section_break_defaults",
+      "fieldtype": "Section Break",
+      "label": "Default Items"
+    },
+    {
+      "fieldname": "default_receipt_item",
+      "fieldtype": "Link",
+      "label": "Default Receipt Item",
+      "options": "Cash Budget Item"
+    },
+    {
+      "fieldname": "default_payment_item",
+      "fieldtype": "Link",
+      "label": "Default Payment Item",
+      "options": "Cash Budget Item"
+    },
+    {
+      "fieldname": "section_break_sources",
+      "fieldtype": "Section Break",
+      "label": "Data Sources"
+    },
+    {
+      "default": "1",
+      "fieldname": "include_journal_entry",
+      "fieldtype": "Check",
+      "label": "Include Journal Entry"
+    },
+    {
+      "default": "1",
+      "fieldname": "include_payment_entry",
+      "fieldtype": "Check",
+      "label": "Include Payment Entry"
+    },
+    {
+      "fieldname": "column_break_sources",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "0",
+      "fieldname": "show_internal_transfers",
+      "fieldtype": "Check",
+      "label": "Show Internal Transfers"
+    },
+    {
+      "default": "1",
+      "fieldname": "detect_intercompany",
+      "fieldtype": "Check",
+      "label": "Detect Intercompany"
+    },
+    {
+      "default": "1",
+      "fieldname": "ignore_cancelled_gl_entries",
+      "fieldtype": "Check",
+      "label": "Ignore Cancelled GL Entries"
+    },
+    {
+      "fieldname": "section_break_mapping",
+      "fieldtype": "Section Break",
+      "label": "Mapping Rules"
+    },
+    {
+      "fieldname": "mapping_rules",
+      "fieldtype": "Table",
+      "label": "Mapping Rules",
+      "options": "Cash Budget Mapping Rule"
+    },
+    {
+      "fieldname": "section_break_cash_accounts",
+      "fieldtype": "Section Break",
+      "label": "Cash Accounts"
+    },
+    {
+      "fieldname": "cash_accounts",
+      "fieldtype": "Table",
+      "label": "Cash Accounts",
+      "options": "Cash Budget Cash Account"
+    },
+    {
+      "fieldname": "section_break_intercompany",
+      "fieldtype": "Section Break",
+      "label": "Intercompany Parties"
+    },
+    {
+      "fieldname": "intercompany_parties",
+      "fieldtype": "Table",
+      "label": "Intercompany Parties",
+      "options": "Cash Budget Intercompany Party"
+    }
+  ],
+  "links": [],
+  "modified": "2026-05-12 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Cash Budget",
+  "name": "Cash Budget Settings",
+  "naming_rule": "Expression",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Accounts Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}

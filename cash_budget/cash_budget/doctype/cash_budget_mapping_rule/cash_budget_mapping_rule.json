@@ -1,0 +1,140 @@
+{
+  "actions": [],
+  "creation": "2026-05-12 10:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "enabled",
+    "priority",
+    "company",
+    "source_type",
+    "journal_entry_type",
+    "payment_type",
+    "column_break_1",
+    "cost_center",
+    "account",
+    "party_type",
+    "party",
+    "mode_of_payment",
+    "section_break_mapping",
+    "cash_budget_item",
+    "direction_override",
+    "notes"
+  ],
+  "fields": [
+    {
+      "default": "1",
+      "fieldname": "enabled",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Enabled"
+    },
+    {
+      "fieldname": "priority",
+      "fieldtype": "Int",
+      "in_list_view": 1,
+      "label": "Priority",
+      "reqd": 1
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company"
+    },
+    {
+      "fieldname": "source_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Source Type",
+      "options": "Both\nJournal Entry\nPayment Entry",
+      "reqd": 1
+    },
+    {
+      "depends_on": "eval:doc.source_type=='Journal Entry' || doc.source_type=='Both'",
+      "fieldname": "journal_entry_type",
+      "fieldtype": "Select",
+      "label": "Journal Entry Type",
+      "options": "\nCash Entry\nBank Entry"
+    },
+    {
+      "depends_on": "eval:doc.source_type=='Payment Entry' || doc.source_type=='Both'",
+      "fieldname": "payment_type",
+      "fieldtype": "Select",
+      "label": "Payment Type",
+      "options": "\nReceive\nPay\nInternal Transfer"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "cost_center",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Cost Center",
+      "options": "Cost Center"
+    },
+    {
+      "fieldname": "account",
+      "fieldtype": "Link",
+      "label": "Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "party_type",
+      "fieldtype": "Link",
+      "label": "Party Type",
+      "options": "DocType"
+    },
+    {
+      "fieldname": "party",
+      "fieldtype": "Dynamic Link",
+      "label": "Party",
+      "options": "party_type"
+    },
+    {
+      "fieldname": "mode_of_payment",
+      "fieldtype": "Link",
+      "label": "Mode of Payment",
+      "options": "Mode of Payment"
+    },
+    {
+      "fieldname": "section_break_mapping",
+      "fieldtype": "Section Break",
+      "label": "Mapping Target"
+    },
+    {
+      "fieldname": "cash_budget_item",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Cash Budget Item",
+      "options": "Cash Budget Item",
+      "reqd": 1
+    },
+    {
+      "default": "Auto",
+      "fieldname": "direction_override",
+      "fieldtype": "Select",
+      "label": "Direction Override",
+      "options": "Auto\nReceipt\nPayment"
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes"
+    }
+  ],
+  "istable": 1,
+  "links": [],
+  "modified": "2026-05-12 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Cash Budget",
+  "name": "Cash Budget Mapping Rule",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "priority",
+  "sort_order": "ASC",
+  "states": [],
+  "track_changes": 1
+}

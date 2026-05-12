@@ -1,0 +1,107 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "field:item_name",
+  "creation": "2026-05-12 10:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "item_name",
+    "section",
+    "parent_item",
+    "is_group",
+    "sequence",
+    "disabled",
+    "description"
+  ],
+  "fields": [
+    {
+      "fieldname": "item_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Item Name",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "section",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Section",
+      "options": "Receipt\nPayment",
+      "reqd": 1
+    },
+    {
+      "fieldname": "parent_item",
+      "fieldtype": "Link",
+      "label": "Parent Item",
+      "options": "Cash Budget Item"
+    },
+    {
+      "default": "0",
+      "fieldname": "is_group",
+      "fieldtype": "Check",
+      "label": "Is Group"
+    },
+    {
+      "default": "0",
+      "fieldname": "sequence",
+      "fieldtype": "Int",
+      "label": "Sequence"
+    },
+    {
+      "default": "0",
+      "fieldname": "disabled",
+      "fieldtype": "Check",
+      "label": "Disabled"
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Description"
+    }
+  ],
+  "links": [],
+  "modified": "2026-05-12 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Cash Budget",
+  "name": "Cash Budget Item",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Accounts Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "read": 1,
+      "report": 1,
+      "role": "Accounts User"
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "sequence",
+  "sort_order": "ASC",
+  "states": [],
+  "title_field": "item_name",
+  "track_changes": 1
+}
