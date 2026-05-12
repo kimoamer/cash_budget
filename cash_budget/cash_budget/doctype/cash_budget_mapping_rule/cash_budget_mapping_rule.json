@@ -55,7 +55,7 @@
       "fieldname": "journal_entry_type",
       "fieldtype": "Select",
       "label": "Journal Entry Type",
-      "options": "\nCash Entry\nBank Entry"
+      "options": "\nBoth\nCash Entry\nBank Entry"
     },
     {
       "depends_on": "eval:doc.source_type=='Payment Entry' || doc.source_type=='Both'",

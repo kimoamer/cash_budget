@@ -77,7 +77,7 @@ def find_matching_rule(row, mapping_rules):
 		if rule.source_type not in ("Both", row.source_type):
 			continue
 
-		if rule.journal_entry_type and row.source_type == "Journal Entry":
+		if rule.journal_entry_type and rule.journal_entry_type != "Both" and row.source_type == "Journal Entry":
 			if rule.journal_entry_type != row.entry_type:
 				continue
 

@@ -1,7 +1,50 @@
 import frappe
 from frappe.utils import flt
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
+
+REPORT_LAYOUT = [
+	{"label": "Balance", "type": "balance"},
+
+	{"label": "Intercompany Collections", "type": "item", "group": "receipts"},
+	{"label": "Local Collections", "type": "item", "group": "receipts"},
+	{"label": "Export Collections", "type": "item", "group": "receipts"},
+	{"label": "Projects - Receipts", "type": "item", "group": "receipts"},
+	{"label": "Other Collections", "type": "item", "group": "receipts"},
+	{"label": "Total Operating Receipts", "type": "total_receipts"},
+
+	{"label": "Operating Payments:", "type": "section"},
+
+	{"label": "Salaries", "type": "item", "group": "operating_payments"},
+	{"label": "Intercompany Purchases", "type": "item", "group": "operating_payments"},
+	{"label": "Purchases Raw & Packing", "type": "item", "group": "operating_payments"},
+	{"label": "Import of Raw Materials", "type": "item", "group": "operating_payments"},
+	{"label": "Manufacturing Overheads", "type": "item", "group": "operating_payments"},
+	{"label": "Selling & Marketing", "type": "item", "group": "operating_payments"},
+	{"label": "General & Administration", "type": "item", "group": "operating_payments"},
+	{"label": "Tax", "type": "item", "group": "operating_payments"},
+	{"label": "Insurances", "type": "item", "group": "operating_payments"},
+	{"label": "Total Operating Payments", "type": "total_operating_payments"},
+
+	{"label": "Net Cash Flow From Operations", "type": "net_operations"},
+
+	{"label": "Purchases Assets", "type": "item", "group": "non_operating"},
+	{"label": "Pay off Loans", "type": "item", "group": "non_operating"},
+	{"label": "Pay off Leasing / Tamweel", "type": "item", "group": "non_operating"},
+	{"label": "Interest", "type": "item", "group": "non_operating"},
+	{"label": "Projects - Payments", "type": "item", "group": "non_operating"},
+	{"label": "Shareholders", "type": "item", "group": "non_operating"},
+	{"label": "Related Parties", "type": "item", "group": "non_operating"},
+	{"label": "Eco Tec", "type": "item", "group": "non_operating"},
+	{"label": "Subtotal - Non-Operating", "type": "total_non_operating"},
+
+	{"label": "Net Cash Flow", "type": "net_total"},
+]
+
+
+# ---------------------------------------------------------------------------
+# Column builders
+# ---------------------------------------------------------------------------
 
 def get_columns(filters):
 	columns = [
@@ -36,7 +79,7 @@ def get_columns(filters):
 			}
 		)
 
-	if filters.get("show_details"):
+	if filters.get("output_format") == "Detail" or filters.get("show_details"):
 		columns.extend(
 			[
 				{
@@ -135,12 +178,326 @@ def get_columns(filters):
 	return columns
 
 
-def build_data(rows, filters, settings):
-	if filters.get("show_details"):
+def get_matrix_columns(report_companies, filters):
+	columns = [
+		{
+			"fieldname": "description",
+			"label": "DES.",
+			"fieldtype": "Data",
+			"width": 280,
+		}
+	]
+
+	include_plan = filters.get("include_plan")
+
+	for company in report_companies:
+		key = frappe.scrub(company)
+
+		if include_plan:
+			columns.append({
+				"fieldname": f"{key}_plan",
+				"label": f"{company} O.Plan",
+				"fieldtype": "Currency",
+				"width": 120,
+			})
+
+		columns.append({
+			"fieldname": f"{key}_actual",
+			"label": f"{company} Actu.",
+			"fieldtype": "Currency",
+			"width": 120,
+		})
+
+	if include_plan:
+		columns.append({
+			"fieldname": "consolidated_plan",
+			"label": "Consolidated O.Plan",
+			"fieldtype": "Currency",
+			"width": 150,
+		})
+
+	columns.append({
+		"fieldname": "consolidated_actual",
+		"label": "Consolidated Actu.",
+		"fieldtype": "Currency",
+		"width": 150,
+	})
+
+	return columns
+
+
+# ---------------------------------------------------------------------------
+# Data builder — dispatcher
+# ---------------------------------------------------------------------------
+
+def build_data(rows, filters, settings, report_companies=None):
+	if filters.get("output_format") == "Matrix":
+		return build_matrix_data(rows, filters, settings, report_companies or [])
+
+	if filters.get("output_format") == "Detail" or filters.get("show_details"):
 		return build_detail_data(rows, filters)
 
 	return build_summary_data(rows, filters)
 
+
+# ---------------------------------------------------------------------------
+# Matrix output
+# ---------------------------------------------------------------------------
+
+def build_matrix_data(rows, filters, settings, report_companies):
+	actual = defaultdict(float)
+	intercompany_rows = []
+	unclassified_rows = []
+	transfer_rows = []
+
+	for row in rows:
+		if row.direction in ("Ignore", "Eliminated"):
+			continue
+
+		if row.direction == "Transfer":
+			transfer_rows.append(row)
+			continue
+
+		if row.direction == "Intercompany":
+			intercompany_rows.append(row)
+			continue
+
+		if row.classification_status == "Unclassified":
+			unclassified_rows.append(row)
+			continue
+
+		if row.direction not in ("Receipt", "Payment"):
+			continue
+
+		if not row.cash_budget_item:
+			continue
+
+		actual[(row.cash_budget_item, row.company)] += flt(row.amount)
+
+	data = []
+	totals = {
+		"receipts": defaultdict(float),
+		"operating_payments": defaultdict(float),
+		"non_operating": defaultdict(float),
+	}
+
+	for line in REPORT_LAYOUT:
+		label = line["label"]
+		line_type = line["type"]
+
+		if line_type == "section":
+			data.append(_matrix_section_row(label, report_companies))
+			continue
+
+		if line_type == "balance":
+			data.append(_matrix_balance_row(label, report_companies))
+			continue
+
+		if line_type == "item":
+			row_dict = _matrix_item_row(label, report_companies, actual)
+
+			group = line.get("group")
+			if group in totals:
+				for company in report_companies:
+					totals[group][company] += actual[(label, company)]
+
+			data.append(row_dict)
+			continue
+
+		if line_type == "total_receipts":
+			data.append(_matrix_total_row(label, report_companies, totals["receipts"]))
+			continue
+
+		if line_type == "total_operating_payments":
+			data.append(_matrix_total_row(label, report_companies, totals["operating_payments"]))
+			continue
+
+		if line_type == "net_operations":
+			net = defaultdict(float)
+			for company in report_companies:
+				net[company] = totals["receipts"][company] - totals["operating_payments"][company]
+			data.append(_matrix_total_row(label, report_companies, net, row_type="net"))
+			continue
+
+		if line_type == "total_non_operating":
+			data.append(_matrix_total_row(label, report_companies, totals["non_operating"]))
+			continue
+
+		if line_type == "net_total":
+			net = defaultdict(float)
+			for company in report_companies:
+				net[company] = (
+					totals["receipts"][company]
+					- totals["operating_payments"][company]
+					- totals["non_operating"][company]
+				)
+			data.append(_matrix_total_row(label, report_companies, net, row_type="net"))
+			continue
+
+	# Intercompany section
+	if filters.get("show_intercompany") and intercompany_rows:
+		data.extend(_matrix_intercompany_section(intercompany_rows, report_companies))
+
+	# Unclassified section
+	if filters.get("show_unclassified") and unclassified_rows:
+		data.extend(_matrix_unclassified_section(unclassified_rows, report_companies))
+
+	# Internal Transfers section
+	if filters.get("show_internal_transfers") and transfer_rows:
+		data.extend(_matrix_transfer_section(transfer_rows, report_companies))
+
+	return data
+
+
+# ---------------------------------------------------------------------------
+# Matrix helper rows
+# ---------------------------------------------------------------------------
+
+def _matrix_item_row(label, report_companies, actual):
+	row = {
+		"description": label,
+		"row_type": "item",
+	}
+
+	consolidated = 0
+
+	for company in report_companies:
+		key = frappe.scrub(company)
+		value = actual[(label, company)]
+		row[f"{key}_actual"] = value
+		consolidated += value
+
+	row["consolidated_actual"] = consolidated
+	return row
+
+
+def _matrix_total_row(label, report_companies, totals_by_company, row_type="total"):
+	row = {
+		"description": label,
+		"row_type": row_type,
+		"is_total_row": 1,
+	}
+
+	consolidated = 0
+
+	for company in report_companies:
+		key = frappe.scrub(company)
+		value = totals_by_company[company]
+		row[f"{key}_actual"] = value
+		consolidated += value
+
+	row["consolidated_actual"] = consolidated
+	return row
+
+
+def _matrix_section_row(label, report_companies):
+	row = {
+		"description": label,
+		"row_type": "section",
+		"is_section_row": 1,
+	}
+
+	for company in report_companies:
+		row[f"{frappe.scrub(company)}_actual"] = None
+
+	row["consolidated_actual"] = None
+	return row
+
+
+def _matrix_balance_row(label, report_companies):
+	row = {
+		"description": label,
+		"row_type": "balance",
+	}
+
+	for company in report_companies:
+		row[f"{frappe.scrub(company)}_actual"] = None
+
+	row["consolidated_actual"] = None
+	return row
+
+
+# ---------------------------------------------------------------------------
+# Matrix extra sections
+# ---------------------------------------------------------------------------
+
+def _matrix_intercompany_section(rows, report_companies):
+	data = [_matrix_section_row("Intercompany Movements", report_companies)]
+
+	summary = defaultdict(lambda: defaultdict(float))
+
+	for row in rows:
+		label = "{0} -> {1}".format(
+			row.company, row.intercompany_counterparty_company or "Unknown"
+		)
+		summary[label][row.company] += flt(row.amount)
+
+	for label, company_amounts in summary.items():
+		row_dict = {"description": label, "row_type": "intercompany"}
+		consolidated = 0
+
+		for company in report_companies:
+			key = frappe.scrub(company)
+			value = company_amounts.get(company, 0)
+			row_dict[f"{key}_actual"] = value
+			consolidated += value
+
+		row_dict["consolidated_actual"] = consolidated
+		data.append(row_dict)
+
+	return data
+
+
+def _matrix_unclassified_section(rows, report_companies):
+	data = [_matrix_section_row("Unclassified / Needs Review", report_companies)]
+
+	summary = defaultdict(lambda: defaultdict(float))
+
+	for row in rows:
+		reason = row.exception_reason or "Unknown"
+		summary[reason][row.company] += flt(row.amount)
+
+	for reason, company_amounts in summary.items():
+		row_dict = {"description": reason, "row_type": "warning"}
+		consolidated = 0
+
+		for company in report_companies:
+			key = frappe.scrub(company)
+			value = company_amounts.get(company, 0)
+			row_dict[f"{key}_actual"] = value
+			consolidated += value
+
+		row_dict["consolidated_actual"] = consolidated
+		data.append(row_dict)
+
+	return data
+
+
+def _matrix_transfer_section(rows, report_companies):
+	data = [_matrix_section_row("Internal Transfers", report_companies)]
+
+	by_company = defaultdict(float)
+	for row in rows:
+		by_company[row.company] += flt(row.amount)
+
+	row_dict = {"description": "Total Internal Transfers", "row_type": "item"}
+	consolidated = 0
+
+	for company in report_companies:
+		key = frappe.scrub(company)
+		value = by_company.get(company, 0)
+		row_dict[f"{key}_actual"] = value
+		consolidated += value
+
+	row_dict["consolidated_actual"] = consolidated
+	data.append(row_dict)
+
+	return data
+
+
+# ---------------------------------------------------------------------------
+# Summary output (existing)
+# ---------------------------------------------------------------------------
 
 def build_summary_data(rows, filters):
 	data = []
@@ -155,7 +512,6 @@ def build_summary_data(rows, filters):
 		if row.direction == "Receipt":
 			key = row.cash_budget_item or "Other Receipts"
 			if filters.get("show_company_breakdown") and filters.report_scope == "Consolidated Group":
-				sub_key = (key, row.company)
 				receipt_items.setdefault(key, OrderedDict())
 				receipt_items[key].setdefault(row.company, 0)
 				receipt_items[key][row.company] += flt(row.amount)
@@ -350,6 +706,10 @@ def build_summary_data(rows, filters):
 
 	return data
 
+
+# ---------------------------------------------------------------------------
+# Detail output (existing)
+# ---------------------------------------------------------------------------
 
 def build_detail_data(rows, filters):
 	data = []

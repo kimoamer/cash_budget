@@ -17,16 +17,33 @@ frappe.query_reports["Cash Budget"] = {
 			reqd: 1,
 		},
 		{
+			fieldname: "output_format",
+			label: __("Output Format"),
+			fieldtype: "Select",
+			options: "Matrix\nSummary\nDetail",
+			default: "Matrix",
+			reqd: 1,
+		},
+		{
+			fieldname: "month",
+			label: __("Month"),
+			fieldtype: "Select",
+			options: "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
+		},
+		{
+			fieldname: "year",
+			label: __("Year"),
+			fieldtype: "Int",
+		},
+		{
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			reqd: 1,
 		},
 		{
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			reqd: 1,
 		},
 		{
 			fieldname: "include_parent_company_entries",
@@ -40,7 +57,8 @@ frappe.query_reports["Cash Budget"] = {
 			label: __("Show Company Breakdown"),
 			fieldtype: "Check",
 			default: 1,
-			depends_on: "eval:doc.report_scope == 'Consolidated Group'",
+			depends_on:
+				"eval:doc.report_scope == 'Consolidated Group' && doc.output_format == 'Summary'",
 		},
 		{
 			fieldname: "cost_center",
@@ -62,12 +80,6 @@ frappe.query_reports["Cash Budget"] = {
 			default: "All",
 		},
 		{
-			fieldname: "show_details",
-			label: __("Show Details"),
-			fieldtype: "Check",
-			default: 0,
-		},
-		{
 			fieldname: "show_unclassified",
 			label: __("Show Unclassified"),
 			fieldtype: "Check",
@@ -86,5 +98,37 @@ frappe.query_reports["Cash Budget"] = {
 			fieldtype: "Check",
 			default: 0,
 		},
+		{
+			fieldname: "include_plan",
+			label: __("Include O.Plan"),
+			fieldtype: "Check",
+			default: 0,
+		},
 	],
+
+	formatter: function (value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (!data) {
+			return value;
+		}
+
+		if (data.row_type === "section") {
+			return `<span style="font-weight:bold; background-color:#00d9d9; display:block; padding:2px;">${value}</span>`;
+		}
+
+		if (data.row_type === "total") {
+			return `<span style="font-weight:bold; color:white; background-color:#0000cc; display:block; padding:2px;">${value}</span>`;
+		}
+
+		if (data.row_type === "net") {
+			return `<span style="font-weight:bold; background-color:#00d9d9; display:block; padding:2px;">${value}</span>`;
+		}
+
+		if (data.row_type === "warning") {
+			return `<span style="font-weight:bold; background-color:#fce4d6; display:block; padding:2px;">${value}</span>`;
+		}
+
+		return value;
+	},
 };

@@ -1,7 +1,25 @@
 import frappe
 
 
-def get_journal_entry_rows(filters, report_companies):
+def get_cash_account_names(settings, report_companies):
+	if not settings or not getattr(settings, "name", None):
+		return []
+
+	cash_accounts = []
+
+	for row in settings.get("cash_accounts", []):
+		if not row.enabled:
+			continue
+
+		if row.company and row.company not in report_companies:
+			continue
+
+		cash_accounts.append(row.account)
+
+	return cash_accounts
+
+
+def get_journal_entry_rows(filters, report_companies, cash_accounts=None):
 	values = {
 		"companies": report_companies,
 		"from_date": filters.from_date,
@@ -13,6 +31,10 @@ def get_journal_entry_rows(filters, report_companies):
 
 	if filters.get("cost_center"):
 		conditions += " AND gle.cost_center = %(cost_center)s"
+
+	if cash_accounts:
+		values["cash_accounts"] = cash_accounts
+		conditions += " AND gle.account NOT IN %(cash_accounts)s"
 
 	return frappe.db.sql(
 		f"""

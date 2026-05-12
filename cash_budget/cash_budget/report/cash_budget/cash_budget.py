@@ -1,3 +1,5 @@
+import calendar
+
 import frappe
 from frappe import _
 
@@ -6,6 +8,7 @@ from cash_budget.cash_budget.utils.companies import (
 	validate_same_currency,
 )
 from cash_budget.cash_budget.utils.queries import (
+	get_cash_account_names,
 	get_journal_entry_rows,
 	get_payment_entry_rows,
 )
@@ -21,12 +24,31 @@ from cash_budget.cash_budget.utils.intercompany import (
 )
 from cash_budget.cash_budget.utils.totals import (
 	get_columns,
+	get_matrix_columns,
 	build_data,
 )
 
 
+MONTH_MAP = {
+	"January": 1,
+	"February": 2,
+	"March": 3,
+	"April": 4,
+	"May": 5,
+	"June": 6,
+	"July": 7,
+	"August": 8,
+	"September": 9,
+	"October": 10,
+	"November": 11,
+	"December": 12,
+}
+
+
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
+
+	apply_month_filters(filters)
 	validate_filters(filters)
 
 	report_companies = get_report_companies(
@@ -38,12 +60,17 @@ def execute(filters=None):
 	validate_same_currency(report_companies)
 
 	settings = get_settings(filters.company, filters.report_scope)
-	columns = get_columns(filters)
+
+	if filters.get("output_format") == "Matrix":
+		columns = get_matrix_columns(report_companies, filters)
+	else:
+		columns = get_columns(filters)
 
 	raw_rows = []
+	cash_accounts = get_cash_account_names(settings, report_companies)
 
 	if filters.source_type in (None, "", "All", "Journal Entry") and settings.include_journal_entry:
-		raw_rows.extend(get_journal_entry_rows(filters, report_companies))
+		raw_rows.extend(get_journal_entry_rows(filters, report_companies, cash_accounts))
 
 	if filters.source_type in (None, "", "All", "Payment Entry") and settings.include_payment_entry:
 		raw_rows.extend(get_payment_entry_rows(filters, report_companies))
@@ -67,9 +94,24 @@ def execute(filters=None):
 			if row.get("cash_budget_item") == filters.get("cash_budget_item")
 		]
 
-	data = build_data(rows, filters, settings)
+	data = build_data(rows, filters, settings, report_companies)
 
 	return columns, data
+
+
+def apply_month_filters(filters):
+	if not filters.get("month") or not filters.get("year"):
+		return
+
+	month_no = MONTH_MAP.get(filters.month)
+	if not month_no:
+		return
+
+	year = int(filters.year)
+	last_day = calendar.monthrange(year, month_no)[1]
+
+	filters.from_date = f"{year}-{month_no:02d}-01"
+	filters.to_date = f"{year}-{month_no:02d}-{last_day:02d}"
 
 
 def validate_filters(filters):
@@ -84,6 +126,9 @@ def validate_filters(filters):
 
 	if not filters.get("report_scope"):
 		filters.report_scope = "Single Company"
+
+	if not filters.get("output_format"):
+		filters.output_format = "Matrix"
 
 
 def get_settings(company, report_scope):
