@@ -14,6 +14,8 @@
     "cost_centers",
     "add_cost_center",
     "account",
+    "against_accounts",
+    "add_against_account",
     "paid_from_account",
     "paid_to_account",
     "party_type",
@@ -88,6 +90,17 @@
       "fieldtype": "Link",
       "label": "Account",
       "options": "Account"
+    },
+    {
+      "fieldname": "against_accounts",
+      "fieldtype": "Small Text",
+      "label": "Against Accounts",
+      "description": "Comma-separated list of against accounts"
+    },
+    {
+      "fieldname": "add_against_account",
+      "fieldtype": "Button",
+      "label": "Add Against Account"
     },
     {
       "depends_on": "eval:doc.source_type=='Payment Entry' || doc.source_type=='Both'",
