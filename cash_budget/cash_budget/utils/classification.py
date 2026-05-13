@@ -52,11 +52,11 @@ def get_mapping_rules(settings_name):
 					"source_type": rule.source_type or "Both",
 					"journal_entry_type": rule.journal_entry_type,
 					"payment_type": rule.payment_type,
-					"cost_center": rule.cost_center,
+					"cost_centers": [c.cost_center for c in (rule.get("cost_centers") or [])],
 					"account": rule.account,
 					"party_type": rule.party_type,
 					"party": rule.party,
-					"mode_of_payment": rule.mode_of_payment,
+					"modes_of_payment": [m.mode_of_payment for m in (rule.get("modes_of_payment") or [])],
 					"cash_budget_item": rule.cash_budget_item,
 					"direction_override": rule.direction_override or "Auto",
 				}
@@ -85,7 +85,7 @@ def find_matching_rule(row, mapping_rules):
 			if rule.payment_type != row.payment_type:
 				continue
 
-		if rule.cost_center and rule.cost_center != row.cost_center:
+		if rule.cost_centers and row.cost_center not in rule.cost_centers:
 			continue
 
 		if rule.account and rule.account != row.account:
@@ -97,7 +97,7 @@ def find_matching_rule(row, mapping_rules):
 		if rule.party and rule.party != row.party:
 			continue
 
-		if rule.mode_of_payment and rule.mode_of_payment != row.mode_of_payment:
+		if rule.modes_of_payment and row.mode_of_payment not in rule.modes_of_payment:
 			continue
 
 		return rule

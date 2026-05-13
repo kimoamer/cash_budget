@@ -2,21 +2,39 @@ import frappe
 
 
 def get_cash_account_names(settings, report_companies):
-	if not settings or not getattr(settings, "name", None):
-		return []
-
+	# Track which companies have explicit account configuration
+	configured_companies = set()
 	cash_accounts = []
 
-	for row in settings.get("cash_accounts", []):
-		if not row.enabled:
-			continue
+	if settings and getattr(settings, "name", None):
+		for row in settings.get("cash_accounts", []):
+			if not row.enabled:
+				continue
 
-		if row.company and row.company not in report_companies:
-			continue
+			if row.company:
+				if row.company not in report_companies:
+					continue
+				configured_companies.add(row.company)
 
-		cash_accounts.append(row.account)
+			cash_accounts.append(row.account)
 
-	return cash_accounts
+	# For companies with no explicit configuration, fall back to account_type = Cash or Bank
+	unconfigured = [c for c in report_companies if c not in configured_companies]
+
+	if unconfigured:
+		fallback = frappe.get_all(
+			"Account",
+			filters={
+				"company": ["in", unconfigured],
+				"account_type": ["in", ["Cash", "Bank"]],
+				"is_group": 0,
+				"disabled": 0,
+			},
+			pluck="name",
+		)
+		cash_accounts.extend(fallback)
+
+	return list(set(cash_accounts))
 
 
 def get_journal_entry_rows(filters, report_companies, cash_accounts=None):
