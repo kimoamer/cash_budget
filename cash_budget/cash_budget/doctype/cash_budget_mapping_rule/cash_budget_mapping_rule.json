@@ -14,6 +14,8 @@
     "cost_centers",
     "add_cost_center",
     "account",
+    "paid_from_account",
+    "paid_to_account",
     "party_type",
     "party",
     "modes_of_payment",
@@ -85,6 +87,20 @@
       "fieldname": "account",
       "fieldtype": "Link",
       "label": "Account",
+      "options": "Account"
+    },
+    {
+      "depends_on": "eval:doc.source_type=='Payment Entry' || doc.source_type=='Both'",
+      "fieldname": "paid_from_account",
+      "fieldtype": "Link",
+      "label": "Paid From Account",
+      "options": "Account"
+    },
+    {
+      "depends_on": "eval:doc.source_type=='Payment Entry' || doc.source_type=='Both'",
+      "fieldname": "paid_to_account",
+      "fieldtype": "Link",
+      "label": "Paid To Account",
       "options": "Account"
     },
     {

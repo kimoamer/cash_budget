@@ -54,6 +54,8 @@ def get_mapping_rules(settings_name):
 					"payment_type": rule.payment_type,
 					"cost_centers": [v.strip() for v in (rule.cost_centers or "").split(",") if v.strip()],
 					"account": rule.account,
+					"paid_from_account": rule.paid_from_account,
+					"paid_to_account": rule.paid_to_account,
 					"party_type": rule.party_type,
 					"party": rule.party,
 					"modes_of_payment": [v.strip() for v in (rule.modes_of_payment or "").split(",") if v.strip()],
@@ -89,6 +91,12 @@ def find_matching_rule(row, mapping_rules):
 			continue
 
 		if rule.account and rule.account != row.account:
+			continue
+
+		if rule.paid_from_account and rule.paid_from_account != row.paid_from:
+			continue
+
+		if rule.paid_to_account and rule.paid_to_account != row.paid_to:
 			continue
 
 		if rule.party_type and rule.party_type != row.party_type:
