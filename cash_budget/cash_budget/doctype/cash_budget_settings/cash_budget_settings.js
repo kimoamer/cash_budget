@@ -1,4 +1,34 @@
 frappe.ui.form.on("Cash Budget Mapping Rule", {
+	add_account(_frm, cdt, cdn) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Add Account"),
+			fields: [
+				{
+					fieldname: "account",
+					fieldtype: "Link",
+					label: __("Account"),
+					options: "Account",
+					reqd: 1,
+				},
+			],
+			primary_action_label: __("Add"),
+			primary_action(values) {
+				const row = locals[cdt][cdn];
+				const existing = (row.accounts || "")
+					.split(",")
+					.map((v) => v.trim())
+					.filter((v) => v);
+
+				if (!existing.includes(values.account)) {
+					existing.push(values.account);
+					frappe.model.set_value(cdt, cdn, "accounts", existing.join(", "));
+				}
+				dialog.hide();
+			},
+		});
+		dialog.show();
+	},
+
 	add_against_account(_frm, cdt, cdn) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Add Against Account"),

@@ -13,11 +13,18 @@
     "column_break_1",
     "cost_centers",
     "add_cost_center",
+    "section_break_account",
     "account",
+    "accounts",
+    "add_account",
+    "account_group",
+    "section_break_against",
     "against_accounts",
     "add_against_account",
+    "section_break_payment",
     "paid_from_account",
     "paid_to_account",
+    "section_break_party",
     "party_type",
     "party",
     "modes_of_payment",
@@ -86,10 +93,38 @@
       "label": "Add Cost Center"
     },
     {
+      "fieldname": "section_break_account",
+      "fieldtype": "Section Break",
+      "label": "Account Matching"
+    },
+    {
       "fieldname": "account",
       "fieldtype": "Link",
-      "label": "Account",
+      "label": "Account (Single)",
       "options": "Account"
+    },
+    {
+      "fieldname": "accounts",
+      "fieldtype": "Small Text",
+      "label": "Accounts (Multiple)",
+      "description": "Comma-separated list of specific accounts"
+    },
+    {
+      "fieldname": "add_account",
+      "fieldtype": "Button",
+      "label": "Add Account"
+    },
+    {
+      "fieldname": "account_group",
+      "fieldtype": "Link",
+      "label": "Account Group",
+      "options": "Account",
+      "description": "Match any child account under this group"
+    },
+    {
+      "fieldname": "section_break_against",
+      "fieldtype": "Section Break",
+      "label": "Against Account Matching"
     },
     {
       "fieldname": "against_accounts",
@@ -104,6 +139,12 @@
     },
     {
       "depends_on": "eval:doc.source_type=='Payment Entry' || doc.source_type=='Both'",
+      "fieldname": "section_break_payment",
+      "fieldtype": "Section Break",
+      "label": "Payment Account Matching"
+    },
+    {
+      "depends_on": "eval:doc.source_type=='Payment Entry' || doc.source_type=='Both'",
       "fieldname": "paid_from_account",
       "fieldtype": "Link",
       "label": "Paid From Account",
@@ -115,6 +156,11 @@
       "fieldtype": "Link",
       "label": "Paid To Account",
       "options": "Account"
+    },
+    {
+      "fieldname": "section_break_party",
+      "fieldtype": "Section Break",
+      "label": "Party Matching"
     },
     {
       "fieldname": "party_type",

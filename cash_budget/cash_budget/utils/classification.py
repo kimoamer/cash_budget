@@ -33,6 +33,19 @@ def normalize_row(row):
 	return row
 
 
+def _is_child_account(account, group):
+	"""Check if account is a child (direct or indirect) of the given group."""
+	current = account
+	visited = set()
+	while current and current not in visited:
+		visited.add(current)
+		parent = frappe.db.get_value("Account", current, "parent_account")
+		if parent == group:
+			return True
+		current = parent
+	return False
+
+
 def get_mapping_rules(settings_name):
 	if not settings_name:
 		return []
@@ -54,6 +67,8 @@ def get_mapping_rules(settings_name):
 					"payment_type": rule.payment_type,
 					"cost_centers": [v.strip() for v in (rule.cost_centers or "").split(",") if v.strip()],
 					"account": rule.account,
+					"accounts": [v.strip() for v in (rule.accounts or "").split(",") if v.strip()],
+					"account_group": rule.account_group,
 					"against_accounts": [v.strip() for v in (rule.against_accounts or "").split(",") if v.strip()],
 					"paid_from_account": rule.paid_from_account,
 					"paid_to_account": rule.paid_to_account,
@@ -92,6 +107,12 @@ def find_matching_rule(row, mapping_rules):
 			continue
 
 		if rule.account and rule.account != row.account:
+			continue
+
+		if rule.accounts and row.account not in rule.accounts:
+			continue
+
+		if rule.account_group and not _is_child_account(row.account, rule.account_group):
 			continue
 
 		if rule.against_accounts:
