@@ -1,35 +1,61 @@
 frappe.ui.form.on("Cash Budget Mapping Rule", {
-	cost_center_selector(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		if (!row.cost_center_selector) return;
+	add_cost_center(_frm, cdt, cdn) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Add Cost Center"),
+			fields: [
+				{
+					fieldname: "cost_center",
+					fieldtype: "Link",
+					label: __("Cost Center"),
+					options: "Cost Center",
+					reqd: 1,
+				},
+			],
+			primary_action_label: __("Add"),
+			primary_action(values) {
+				const row = locals[cdt][cdn];
+				const existing = (row.cost_centers || "")
+					.split(",")
+					.map((v) => v.trim())
+					.filter((v) => v);
 
-		const existing = (row.cost_centers || "")
-			.split(",")
-			.map((v) => v.trim())
-			.filter((v) => v);
-
-		if (!existing.includes(row.cost_center_selector)) {
-			existing.push(row.cost_center_selector);
-			frappe.model.set_value(cdt, cdn, "cost_centers", existing.join(", "));
-		}
-
-		frappe.model.set_value(cdt, cdn, "cost_center_selector", "");
+				if (!existing.includes(values.cost_center)) {
+					existing.push(values.cost_center);
+					frappe.model.set_value(cdt, cdn, "cost_centers", existing.join(", "));
+				}
+				dialog.hide();
+			},
+		});
+		dialog.show();
 	},
 
-	mode_of_payment_selector(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		if (!row.mode_of_payment_selector) return;
+	add_mode_of_payment(_frm, cdt, cdn) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Add Mode of Payment"),
+			fields: [
+				{
+					fieldname: "mode_of_payment",
+					fieldtype: "Link",
+					label: __("Mode of Payment"),
+					options: "Mode of Payment",
+					reqd: 1,
+				},
+			],
+			primary_action_label: __("Add"),
+			primary_action(values) {
+				const row = locals[cdt][cdn];
+				const existing = (row.modes_of_payment || "")
+					.split(",")
+					.map((v) => v.trim())
+					.filter((v) => v);
 
-		const existing = (row.modes_of_payment || "")
-			.split(",")
-			.map((v) => v.trim())
-			.filter((v) => v);
-
-		if (!existing.includes(row.mode_of_payment_selector)) {
-			existing.push(row.mode_of_payment_selector);
-			frappe.model.set_value(cdt, cdn, "modes_of_payment", existing.join(", "));
-		}
-
-		frappe.model.set_value(cdt, cdn, "mode_of_payment_selector", "");
+				if (!existing.includes(values.mode_of_payment)) {
+					existing.push(values.mode_of_payment);
+					frappe.model.set_value(cdt, cdn, "modes_of_payment", existing.join(", "));
+				}
+				dialog.hide();
+			},
+		});
+		dialog.show();
 	},
 });
