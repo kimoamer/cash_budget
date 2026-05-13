@@ -12,10 +12,12 @@
     "payment_type",
     "column_break_1",
     "cost_centers",
+    "cost_center_selector",
     "account",
     "party_type",
     "party",
     "modes_of_payment",
+    "mode_of_payment_selector",
     "section_break_mapping",
     "cash_budget_item",
     "direction_override",
@@ -70,9 +72,16 @@
     },
     {
       "fieldname": "cost_centers",
-      "fieldtype": "Table MultiSelect",
-      "label": "Cost Center",
-      "options": "Cash Budget Rule Cost Center"
+      "fieldtype": "Small Text",
+      "label": "Cost Centers",
+      "description": "Comma-separated list of cost centers"
+    },
+    {
+      "fieldname": "cost_center_selector",
+      "fieldtype": "Link",
+      "label": "Add Cost Center",
+      "options": "Cost Center",
+      "is_virtual": 1
     },
     {
       "fieldname": "account",
@@ -94,9 +103,16 @@
     },
     {
       "fieldname": "modes_of_payment",
-      "fieldtype": "Table MultiSelect",
-      "label": "Mode of Payment",
-      "options": "Cash Budget Rule Mode Of Payment"
+      "fieldtype": "Small Text",
+      "label": "Modes of Payment",
+      "description": "Comma-separated list of modes of payment"
+    },
+    {
+      "fieldname": "mode_of_payment_selector",
+      "fieldtype": "Link",
+      "label": "Add Mode of Payment",
+      "options": "Mode of Payment",
+      "is_virtual": 1
     },
     {
       "fieldname": "section_break_mapping",

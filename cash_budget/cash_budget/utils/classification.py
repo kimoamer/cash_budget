@@ -52,11 +52,11 @@ def get_mapping_rules(settings_name):
 					"source_type": rule.source_type or "Both",
 					"journal_entry_type": rule.journal_entry_type,
 					"payment_type": rule.payment_type,
-					"cost_centers": [c.cost_center for c in (rule.get("cost_centers") or [])],
+					"cost_centers": [v.strip() for v in (rule.cost_centers or "").split(",") if v.strip()],
 					"account": rule.account,
 					"party_type": rule.party_type,
 					"party": rule.party,
-					"modes_of_payment": [m.mode_of_payment for m in (rule.get("modes_of_payment") or [])],
+					"modes_of_payment": [v.strip() for v in (rule.modes_of_payment or "").split(",") if v.strip()],
 					"cash_budget_item": rule.cash_budget_item,
 					"direction_override": rule.direction_override or "Auto",
 				}
